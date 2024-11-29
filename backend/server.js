@@ -18,26 +18,56 @@ app.use(cors());
 app.use(express.json());
 
 // Connect to MongoDB
-mongoose.connect('mongodb://localhost/chat-app', {
+mongoose.connect('mongodb://localhost/chat', {
 	useNewUrlParser: true,
 	useUnifiedTopology: true,
 });
 
 // User Schema
-const UserSchema = new mongoose.Schema({
-	username: String,
-	password: String,
-	role: { type: String, enum: ['admin', 'user'], default: 'user' },
-});
+const UserSchema = new mongoose.Schema(
+	{
+		email: String,
+		username: String,
+		password: String,
+		status: { type: String, enum: ['online', 'offline'], default: 'offline' },
+	},
+	{
+		timestamps: true,
+	}
+);
 const User = mongoose.model('User', UserSchema);
 
+// Group Schema
+const GroupSchema = new mongoose.Schema(
+	{
+		name: String,
+		created_by: String,
+		members: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
+	},
+	{
+		timestamps: true,
+	}
+);
+const Group = mongoose.model('Group', GroupSchema);
+
 // Message Schema
-const MessageSchema = new mongoose.Schema({
-	sender: String,
-	receiver: String,
-	content: String,
-	timestamp: { type: Date, default: Date.now },
-});
+const MessageSchema = new mongoose.Schema(
+	{
+		group_id: String,
+		sender_id: String,
+		content: String,
+		message: String,
+		message_type: {
+			type: String,
+			enum: ['text', 'image', 'video'],
+			default: 'text',
+		},
+		attachments: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Attachment' }],
+	},
+	{
+		timestamps: true,
+	}
+);
 const Message = mongoose.model('Message', MessageSchema);
 
 // Routes for user registration and login
